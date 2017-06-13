@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 3.5)
-SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++11")
-SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
+SET(GCC_COVERAGE_COMPILE_FLAGS "-std=c++11")
+SET(GCC_COVERAGE_LINK_FLAGS "")
+add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
+
 project (FilterDataSetKit)
 
 find_package(OpenCV REQUIRED)
