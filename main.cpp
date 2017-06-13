@@ -8,6 +8,7 @@
 #include <string>
 #include <stdio.h>
 #include <assert.h>
+#include <fstream>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -210,29 +211,47 @@ read_Data(string path,vector<string> filenames){
 }
 
 void
-keyValueHandle(int key){
-    if(key != -1) return;
-    map<int,int> numArray = {
-                                {1114032,0},{1114033,1},
-                                {1114034,2},{1114035,3},
-                                {1114036,4},{1114037,5},
-                                {1114038,6},{1114039,7},
-                                {1114040,8},{1114041,9}
+keyValueHandle(string path,int key){
+    // combine two file shell (cover dst file) : 
+    // cat src1.txt src2.txt > dst.txt
+    // combine two file shell (add to end of dst file) : 
+    // cat src1.txt src2.txt >> dst.txt
+    if(key == -1) return;
+    //cout<<key<<endl;
+    map<int,string> numArray = {
+                                {1114032,"0"},{1114033,"1"},
+                                {1114034,"2"},{1114035,"3"},
+                                {1114036,"4"},{1114037,"5"},
+                                {1114038,"6"},{1114039,"7"},
+                                {1114040,"8"},{1114041,"9"}
                             };
     if(numArray.find(key) != numArray.end()){
         //cout<<"Key Value : "<<numArray[key]<<endl;
-
+        ofstream out(path,ios::out | ios::app);
+        if(out.is_open()){
+            for( auto i : GImageName.tempBuf){                
+                out << i.first 
+                    << " " 
+                    << numArray[key]
+                    <<endl;
+            }
+            out.close();
+            GImageName.tempBuf.clear();
+        }
+        else cerr<<"Output TXT Open Failed!"<<endl;
     }
 }
 
 int 
 main(int argc,char** argv){
-    if (argc != 2) {
+    if (argc != 3) {
         cerr << "Usage: " << argv[0]                
-                << "<image/data/set/path>" << std::endl;
+                << "<image/data/set/path> "
+                << "<output/txt/file>" << std::endl;
         return 1;
     }
     string imgsPath = argv[1];
+    string outputTxt = argv[2];
 
     string win_name = "imgVector";
     string selectedImageWinName = "Selected Image";
@@ -268,7 +287,7 @@ main(int argc,char** argv){
             int k = waitKey(33);
             if(k == 1048603/*<ESC>*/) break;
             else if(k == 1048689/*q*/) exit(1);
-            else keyValueHandle(k);
+            else keyValueHandle(outputTxt,k);
         }
     }
 
