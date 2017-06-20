@@ -21,6 +21,32 @@
 using namespace std;
 using namespace cv;
 
+typedef struct ImageData{
+    const int eachReadNum = 600;
+    vector<Mat> currentGroupImage;    
+    Mat cellImage;
+    int colsNum = 30;
+    int gap = 5;
+    int read_Offset = 0;
+}_imageData;
+
+_imageData GImageData;
+
+typedef struct ImagesFileName{
+    vector<string> currentImageName;
+    map<string,Mat> tempBuf;
+    vector<string> displayContent;
+}_imagesFileName;
+
+_imagesFileName GImageName;
+
+typedef struct SaveItem{
+    vector<int> countEachNum;
+    int currentIterNum;
+}_saveItem;
+
+_saveItem GSaveItem;
+
 int 
 getOrderByMousePoint(int x,int y){
     assert(x>=0 && y>=0);
@@ -261,7 +287,7 @@ keyValueHandle(string path,int key){
                     x.at(4),x.at(5),x.at(6),x.at(7),
                     x.at(8),x.at(9)
                     );
-        }        
+        }
     }
     else if(key == _KEY_VALUE_ESC/*<ESC>*/){
         // 1. save image name and the num of image what is called
