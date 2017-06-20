@@ -14,7 +14,7 @@ link_directories(
     /usr/lib
 )
 
-add_executable(main ${DIRSRCS})
+add_executable(FilterDataSetKit ${DIRSRCS})
 target_link_libraries (
-    main ${OpenCV_LIBS} 
+    FilterDataSetKit ${OpenCV_LIBS} m
 )

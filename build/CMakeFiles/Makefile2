@@ -60,39 +60,39 @@ CMAKE_SOURCE_DIR = /home/yinshuhua/Work/FilterDataSetKit
 CMAKE_BINARY_DIR = /home/yinshuhua/Work/FilterDataSetKit/build
 
 #=============================================================================
-# Target rules for target CMakeFiles/main.dir
+# Target rules for target CMakeFiles/FilterDataSetKit.dir
 
 # All Build rule for target.
-CMakeFiles/main.dir/all:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/depend
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/yinshuhua/Work/FilterDataSetKit/build/CMakeFiles --progress-num=1,2 "Built target main"
-.PHONY : CMakeFiles/main.dir/all
+CMakeFiles/FilterDataSetKit.dir/all:
+	$(MAKE) -f CMakeFiles/FilterDataSetKit.dir/build.make CMakeFiles/FilterDataSetKit.dir/depend
+	$(MAKE) -f CMakeFiles/FilterDataSetKit.dir/build.make CMakeFiles/FilterDataSetKit.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/yinshuhua/Work/FilterDataSetKit/build/CMakeFiles --progress-num=1,2 "Built target FilterDataSetKit"
+.PHONY : CMakeFiles/FilterDataSetKit.dir/all
 
 # Include target in all.
-all: CMakeFiles/main.dir/all
+all: CMakeFiles/FilterDataSetKit.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/main.dir/rule: cmake_check_build_system
+CMakeFiles/FilterDataSetKit.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yinshuhua/Work/FilterDataSetKit/build/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/main.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/FilterDataSetKit.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yinshuhua/Work/FilterDataSetKit/build/CMakeFiles 0
-.PHONY : CMakeFiles/main.dir/rule
+.PHONY : CMakeFiles/FilterDataSetKit.dir/rule
 
 # Convenience name for target.
-main: CMakeFiles/main.dir/rule
+FilterDataSetKit: CMakeFiles/FilterDataSetKit.dir/rule
 
-.PHONY : main
-
-# clean rule for target.
-CMakeFiles/main.dir/clean:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/clean
-.PHONY : CMakeFiles/main.dir/clean
+.PHONY : FilterDataSetKit
 
 # clean rule for target.
-clean: CMakeFiles/main.dir/clean
+CMakeFiles/FilterDataSetKit.dir/clean:
+	$(MAKE) -f CMakeFiles/FilterDataSetKit.dir/build.make CMakeFiles/FilterDataSetKit.dir/clean
+.PHONY : CMakeFiles/FilterDataSetKit.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/FilterDataSetKit.dir/clean
 
 .PHONY : clean
 

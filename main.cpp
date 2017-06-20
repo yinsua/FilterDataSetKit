@@ -9,33 +9,17 @@
 #include <stdio.h>
 #include <assert.h>
 #include <fstream>
+#include <math.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/contrib/contrib.hpp>
 
+#include "main.hpp"
+
 using namespace std;
 using namespace cv;
-
-typedef struct ImageData{
-    const int eachReadNum = 60;
-    vector<Mat> currentGroupImage;    
-    Mat cellImage;
-    int colsNum = 30;
-    int gap = 5;
-    int read_Offset = 0;
-}_imageData;
-
-_imageData GImageData;
-
-typedef struct ImagesFileName{
-    vector<string> currentImageName;
-    map<string,Mat> tempBuf;
-    vector<string> displayContent;
-}_imagesFileName;
-
-_imagesFileName GImageName;
 
 int 
 getOrderByMousePoint(int x,int y){
@@ -190,6 +174,7 @@ read_Filename(string path){
     assert(path.size()>2);
     
     Directory dir;
+    // TODO : if the file of in <path> dir don't change, so the vector of files is same 
     vector<string> filenames = dir.GetListFiles(path);
     return filenames;
 }
@@ -211,13 +196,47 @@ read_Data(string path,vector<string> filenames){
 }
 
 void
+write_saveItem(int num,vector<int> countNum,string filename = _FILE_NAME){
+    FileStorage fs(filename, FileStorage::WRITE);
+    fs << "IterNum" << num;
+    fs << "CountNum" << countNum;
+    fs.release();
+}
+
+void
+read_saveItem(string filename = _FILE_NAME){
+    int iterNum=0;
+    vector<int> countNum(10,0);
+    FileStorage fs;
+    fs.open(filename, FileStorage::READ);
+    if(fs.isOpened()){
+        fs["IterNum"] >> iterNum;
+        vector<int> temp;
+        fs["CountNum"] >> temp;
+        if(temp.empty()){            
+            write_saveItem(iterNum,countNum);
+        }
+        else{
+            countNum = temp;
+        }   
+        fs.release();
+    }
+    else{
+        write_saveItem(iterNum,countNum);
+    }
+    GSaveItem.currentIterNum = iterNum;
+    GSaveItem.countEachNum = countNum;
+}
+
+void
 keyValueHandle(string path,int key){
     // combine two file shell (cover dst file) : 
     // cat src1.txt src2.txt > dst.txt
     // combine two file shell (add to end of dst file) : 
     // cat src1.txt src2.txt >> dst.txt
     if(key == -1) return;
-    //cout<<key<<endl;
+    static vector<string> tempSave;    
+
     map<int,string> numArray = {
                                 {1114032,"0"},{1114033,"1"},
                                 {1114034,"2"},{1114035,"3"},
@@ -227,44 +246,84 @@ keyValueHandle(string path,int key){
                             };
     if(numArray.find(key) != numArray.end()){
         //cout<<"Key Value : "<<numArray[key]<<endl;
+        for( auto i : GImageName.tempBuf){
+            string temp = i.first + " " + numArray[key] + "\n";
+            tempSave.push_back(temp);
+        }
+        int num = (int)(numArray[key][0])-48;
+        GSaveItem.countEachNum.at(num) += GImageName.tempBuf.size();
+        GImageName.tempBuf.clear();
+        // print
+        {
+            vector<int> x = GSaveItem.countEachNum;
+            printf("Count : \n\t0: %d\n\t1: %d\n\t2: %d\n\t3: %d\n\t4: %d\n\t5: %d\n\t6: %d\n\t7: %d\n\t8: %d\n\t9: %d\n",
+                    x.at(0),x.at(1),x.at(2),x.at(3),
+                    x.at(4),x.at(5),x.at(6),x.at(7),
+                    x.at(8),x.at(9)
+                    );
+        }        
+    }
+    else if(key == _KEY_VALUE_ESC/*<ESC>*/){
+        // 1. save image name and the num of image what is called
         ofstream out(path,ios::out | ios::app);
         if(out.is_open()){
-            for( auto i : GImageName.tempBuf){                
-                out << i.first 
-                    << " " 
-                    << numArray[key]
-                    <<endl;
+            for( auto i : tempSave){                
+                out << i;
             }
+            tempSave.clear();
             out.close();
-            GImageName.tempBuf.clear();
         }
-        else cerr<<"Output TXT Open Failed!"<<endl;
+        else{
+            cerr<<"Output TXT Open Failed!"<<endl;
+            exit(1);
+        }
+
+        // 2. save count num and iter num
+        GSaveItem.currentIterNum++;
+        write_saveItem(GSaveItem.currentIterNum,GSaveItem.countEachNum);
+
     }
+    else cerr<<"Unknow Key!"<<endl;
 }
 
 int 
 main(int argc,char** argv){
     if (argc != 3) {
-        cerr << "Usage: " << argv[0]                
-                << "<image/data/set/path> "
-                << "<output/txt/file>" << std::endl;
+        cerr << "Usage: " << argv[0]
+                << " <image/data/set/path>"
+                << " <output/txt/file>" << std::endl;
         return 1;
     }
+    string usageInfo =  "Key Map : \n"
+                        "\t<ESC> : Next Page \n" 
+                        "\t<q>   : Exit \n"
+                        "\t[0~9] : Selected Image what is called \n"
+                        ;
+    cout<<usageInfo<<endl;
     string imgsPath = argv[1];
     string outputTxt = argv[2];
 
-    string win_name = "imgVector";
-    string selectedImageWinName = "Selected Image";
-    
     vector<string> filenames = read_Filename(imgsPath);
+
+    read_saveItem();
+
+    string win_name = "imgVector (" + 
+            to_string(GSaveItem.currentIterNum+1) + 
+            "/" +
+            to_string(filenames.size() / GImageData.eachReadNum + 1) +
+            ")";
+    string selectedImageWinName = "Selected Image";
 
     const int a=1,b=2;
     vector<string>::iterator it;
     it = filenames.begin();
+    it += GSaveItem.currentIterNum*GImageData.eachReadNum;
     while(1)
-    {        
+    {
         vector<string> temp;
         if(filenames.end()-it <= 0){
+            cout<<"IterNum : "<<GSaveItem.currentIterNum<<endl;
+            cout<<"Finish!"<<endl;
             break;
         }
         else if(filenames.end()-it<GImageData.eachReadNum){
@@ -279,17 +338,34 @@ main(int argc,char** argv){
         assert(!imgVector.empty());
         GImageData.currentGroupImage=imgVector;
         GImageData.cellImage=imgVector.back();
+
+        win_name = "imgVector (" + 
+            to_string(GSaveItem.currentIterNum+1) + 
+            "/" +
+            to_string(filenames.size() / GImageData.eachReadNum + 1) +
+            ")";
+
+        destroyAllWindows();
+
         while (1){
             setMouseCallback(win_name,on_mouse,(void*)&a);
             setMouseCallback(selectedImageWinName,on_mouse,(void*)&b);
             groupEachImage(win_name,GImageData.currentGroupImage);            
             groupEachImage(selectedImageWinName,getData4Map(GImageName.tempBuf));
             int k = waitKey(33);
-            if(k == 1048603/*<ESC>*/) break;
-            else if(k == 1048689/*q*/) exit(1);
-            else keyValueHandle(outputTxt,k);
-        }
+            if(k == _KEY_VALUE_q/*q*/) exit(1);
+            else{
+                keyValueHandle(outputTxt,k);
+                if(k == _KEY_VALUE_ESC/*<ESC>*/) break;
+            }
+        }        
     }
 
+    // clean up
+    {        
+        vector<int> temp(10,0);
+        write_saveItem(0,temp);
+    }
+    
     return 0;
 }
